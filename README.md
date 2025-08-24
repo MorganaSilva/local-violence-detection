@@ -49,7 +49,10 @@ python webcam.py
 
 Optional arguments:
 - `--camera`: Camera index (default is `0` if you have only one camera).  
-- `--binary-settings`: Use this flag if `settings.yaml` is configured for two labels only (`violence` / `non-violence`).  
+- `--binary-settings`: Use this flag if `settings.yaml` is configured for two labels only (`violence` / `non-violence`). Example:
+```bash
+python webcam.py --binary-settings
+```
 - `--record`: Path to save the processed video. Example:
 ```bash
 python webcam.py --record ./output.mp4

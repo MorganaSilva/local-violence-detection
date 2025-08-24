@@ -1,37 +1,14 @@
-#model-settings:
- # prediction-threshold: 0.23  # max value of cosine similarity can be 1
- # model-name: 'ViT-B/32'
- # device: 'cpu'
-#label-settings:
- # labels: # labels that can be predicted if model's confidence is more than "prediction-threshold"
-    # outdoor cases
-  #  - 'people walking on a street'
-  #  - 'buildings'
-  #  - 'fight on a street'
-  #  - 'fire on a street'
-  #  - 'street violence'
-  #  - 'road'
-  #  - 'car crash'
-  #  - 'cars on a road'
-  #  - 'car parking area'
-  #  - 'cars'
-    # indoor cases
-  #  - 'office environment'
-  #  - 'office corridor'
-  #  - 'violence in office'
-  #  - 'fire in office'
-  #  - 'people talking'
-  #  - 'people walking in office'
-  #  - 'person walking in office'
-  #  - 'group of people'
-  #default-label: 'Unknown' # value to return if model's confidence is less than "prediction-threshold"
 model-settings:
-  prediction-threshold: 0.23   # confiança mínima (0 a 1)
+  #prediction-threshold: 0.23 #minimum confidence (0 to 1) (confiança mínima (0 a 1))
+  prediction-threshold: 0.225 #CALIBRATED THRESHOLD
   model-name: 'ViT-B/32'
-  device: 'cpu'                # troque para 'cuda' se tiver GPU
+  device: 'cpu' #switch to 'cuda' if you have GPU (troque para 'cuda' se tiver GPU)
+
+##If there are many false positives: increase to 0.23
+##If there are many false negatives: decrease to 0.22
 
 label-settings:
   labels:
-    - "Violence: people fighting, assault, physical aggression, punches, kicks, unsafe conflict"
-    - "Non-violence: normal scene, no physical aggression, people talking calmly, safe environment"
+    - "Violence: physical fighting, punches, kicks, assault, aggression, brawl, armed conflict, weapon attack, knife attack, gun violence, person holding a knife, person with a weapon, violent struggle, dangerous altercation"
+    - "Non-violence: calm, peaceful, normal activity, people talking, safe, neutral, everyday scene, harmless situation, friendly interaction, relaxed atmosphere"
   default-label: "Non-violence: normal scene, no physical aggression, people talking calmly, safe environment"

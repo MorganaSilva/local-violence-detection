@@ -6,7 +6,7 @@ import numpy as np
 
 from model import Model
 
-# Ajuste dos rótulos se não usar settings.yaml binário
+##labels if I don't use binary settings.yaml
 VIOLENCE_LABELS = {
     "violence", "fight", "fighting", "assault", "aggression", "weapon", "knife", "gun"
 }
@@ -21,23 +21,23 @@ def is_violence_from_label(label: str, binary_mode: bool) -> bool:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--camera", type=int, default=0, help="Índice da câmera (C922 geralmente é 0 se for única)")
+    ap.add_argument("--camera", type=int, default=0, help="Camera index (C922 is usually 0 if single)")
     ap.add_argument("--binary-settings", action="store_true",
-                    help="Use se você deixou o settings.yaml com só 2 rótulos (Violence / Non-violence)")
-    ap.add_argument("--record", type=str, default="", help="Caminho para salvar vídeo (opcional, ex.: out.mp4)")
+                    help="Use if you left settings.yaml with only 2 labels (Violence / Non-violence)")
+    ap.add_argument("--record", type=str, default="", help="Path to save video (optional, e.g. out.mp4)") #TODO: adjust the recording, and direct it to the correct path
     args = ap.parse_args()
 
-    # Configurações otimizadas para Logitech C922 Pro
+    #settings optimized for WEBCAM C992
     FRAME_WIDTH = 1280
     FRAME_HEIGHT = 720
     FRAME_FPS = 15
 
-    print(f"Iniciando Logitech C922 Pro em {FRAME_WIDTH}x{FRAME_HEIGHT} @ {FRAME_FPS}fps")
+    print(f"Starting Logitech C922 Pro in {FRAME_WIDTH}x{FRAME_HEIGHT} @ {FRAME_FPS}fps")
 
     model = Model()
     cap = cv2.VideoCapture(args.camera)
     if not cap.isOpened():
-        raise RuntimeError(f"Não consegui abrir a câmera {args.camera}")
+        raise RuntimeError(f"Unable to open camera {args.camera}")
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
@@ -48,7 +48,7 @@ def main():
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(args.record, fourcc, FRAME_FPS, (FRAME_WIDTH, FRAME_HEIGHT))
 
-    # janela de suavização
+    #smoothing window(janela de suavização)
     hist = deque(maxlen=12)
     last_time = 0.0
 
@@ -63,14 +63,26 @@ def main():
                 continue
             last_time = now
 
+            #rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            #out = model.predict(image=rgb)
+            
+            ##IMPROVEMENT: Lighting normalization
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            out = model.predict(image=rgb)
+            rgb_normalized = cv2.normalize(rgb, None, 0, 255, cv2.NORM_MINMAX)
+            out = model.predict(image=rgb_normalized)
+
+            ##data collection to calculate the ideal threshold
+            # label = out.get("label", "Unknown")
+            # confidence = out.get("confidence", 0.0)
+            # LOG: RAW confidence and the class
+            # print(f"Trust: {confidence:.4f} | Class: {label}")
+            
             label = (out or {}).get("label", None)
 
             violence = is_violence_from_label(label, args.binary_settings)
             hist.append(1 if violence else 0)
             votes = sum(hist)
-            triggered = votes >= 8  # mínimo de 8 votos de violência em 12 frames
+            triggered = votes >= 8  #minimum of 8 votes of violence in 12 frames (minimo de 8 votos de violência em 12 frames)
 
             display = frame.copy()
             h, w = display.shape[:2]
